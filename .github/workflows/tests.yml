@@ -26,7 +26,6 @@ jobs:
           **/node_modules/**
           .env
           vendor/**
-        passive: true
         timeout: 120000
         log-level: verbose
         protocol: ftp
