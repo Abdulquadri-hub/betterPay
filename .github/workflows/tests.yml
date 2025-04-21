@@ -25,7 +25,6 @@ jobs:
           **/.git*/**
           **/node_modules/**
           .env
-          .editorconfig
           vendor/**
 
     - name: Run Migrations
