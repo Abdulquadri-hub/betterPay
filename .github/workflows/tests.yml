@@ -26,8 +26,6 @@ jobs:
           **/node_modules/**
           .env
           vendor/**
-        timeout: 120000
-        log-level: verbose
         protocol: ftp
 
     - name: Run Migrations
