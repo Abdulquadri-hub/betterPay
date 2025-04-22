@@ -21,7 +21,6 @@ Route::prefix('v1')->group(function () {
         Route::post('forgot_password', [AuthController::class, 'forgotPassword']);
         Route::post('reset_password', [AuthController::class, 'resetPassword']);
     });
-
     
     Route::post('webhooks/paystack', [WalletController::class, 'paystackWebhook']);
     Route::post('webhooks/flutterwave', [WalletController::class, 'flutterwaveWebhook']);
