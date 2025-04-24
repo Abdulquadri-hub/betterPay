@@ -185,21 +185,11 @@ class PaystackService
 
             if ($responseData['status']) {
 
-                switch ($request->type) {
-                    case 'membership':
-                        // Payment::create([
-                        //     'mem_subscription_id' => $request->subscription_id ?? null,
-                        //     'amount' => $request->amount,
-                        //     'transaction_reference' => $responseData['data']['reference'],
-                        //     'status' => 'pending',
-                        // ]);
-                        break;
-                    default:
-                        break;
-                }
+                $status = $responseData['data']['status'] ?? '';
 
                 return [
                     'status' => 'success',
+                    'charge_status' => $status,
                     'reference' => $responseData['data']['reference'],
                     'message' =>  $responseData['message'],
                     'data' => $responseData['data']
@@ -210,6 +200,119 @@ class PaystackService
 
         } catch (GuzzleException $e) {
             Log::error('Paystack direct charge error: ' . $e->getMessage());
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+    public function bankAccountCharge(array $data)
+    {
+        try {
+            $payload = [
+                'email' => $data['email'] ?? Auth::user()->email,
+                'amount' => $data['amount'] * 100, // Convert to kobo
+                'metadata' => [
+                    'custom_fields' => [
+                        [
+                            'user_id' => Auth::id(),
+                            'reference' => $data['subscription_id'] ?? null,
+                            'type' => $data['type'] ?? 'wallet_funding'
+                        ]
+                    ]
+                ],
+            ];
+
+            // Handle Kuda Bank specifically which requires phone and token
+            if (isset($data['bank_code']) && $data['bank_code'] === '50211') {
+                $payload['bank'] = [
+                    'code' => $data['bank_code'],
+                    'phone' => $data['phone'],
+                    'token' => $data['token']
+                ];
+            } else {
+                // For other banks
+                $payload['bank'] = [
+                    'code' => $data['bank_code'],
+                    'account_number' => $data['account_number']
+                ];
+            }
+
+            if (isset($data['birthday'])) {
+                $payload['birthday'] = $data['birthday'];
+            }
+
+            $response = $this->client->post('/charge', [
+                'json' => $payload
+            ]);
+
+            $responseData = json_decode($response->getBody(), true);
+
+            if ($responseData['status']) {
+                // Handle different status responses
+                $status = $responseData['data']['status'] ?? '';
+
+                return [
+                    'status' => 'success',
+                    'charge_status' => $status,
+                    'reference' => $responseData['data']['reference'],
+                    'message' => $responseData['message'],
+                    'display_text' => $responseData['data']['display_text'] ?? '',
+                    'data' => $responseData['data']
+                ];
+            }
+
+            return $this->errorResponse('Bank payment charge failed', 400, $responseData);
+
+        } catch (GuzzleException $e) {
+            Log::error('Paystack bank account charge error: ' . $e->getMessage());
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+    public function submitBirthday($reference, $birthday)
+    {
+        try {
+            $response = $this->client->post('/charge/submit_birthday', [
+                'json' => [
+                    'reference' => $reference,
+                    'birthday' => $birthday // Format: YYYY-MM-DD
+                ]
+            ]);
+
+            $responseData = json_decode($response->getBody(), true);
+
+            if ($responseData['status']) {
+                return [
+                    'status' => 'success',
+                    'message' => $responseData['message'],
+                    'data' => $responseData['data']
+                ];
+            }
+
+            return $this->errorResponse('Birthday submission failed', 400);
+
+        } catch (GuzzleException $e) {
+            Log::error('Paystack birthday submission error: ' . $e->getMessage());
+            return $this->errorResponse($e->getMessage(), 500);
+        }
+    }
+
+    public function getBanks()
+    {
+        try {
+            $response = $this->client->get('/bank?pay_with_bank=true&country=nigeria');
+            $responseData = json_decode($response->getBody(), true);
+
+            if ($responseData['status']) {
+                return [
+                    'status' => 'success',
+                    'data' => $responseData['data']
+                ];
+            }
+
+            return $this->errorResponse('Failed to fetch banks', 400);
+
+        } catch (GuzzleException $e) {
+            Log::error('Paystack fetch banks error: ' . $e->getMessage());
             return $this->errorResponse($e->getMessage(), 500);
         }
     }
@@ -315,5 +418,4 @@ class PaystackService
 
         return $this->errorResponse('Customer account failed', 400);
     }
-
 }

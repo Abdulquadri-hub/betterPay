@@ -21,7 +21,7 @@ Route::prefix('v1')->group(function () {
         Route::post('forgot_password', [AuthController::class, 'forgotPassword']);
         Route::post('reset_password', [AuthController::class, 'resetPassword']);
     });
-    
+
     Route::post('webhooks/paystack', [WalletController::class, 'paystackWebhook']);
     Route::post('webhooks/flutterwave', [WalletController::class, 'flutterwaveWebhook']);
 
@@ -35,10 +35,16 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::prefix('wallet')->group(function () {
-            Route::get('/', [WalletController::class, 'show']);
-            Route::get('history', [WalletController::class, 'history']);
-            Route::post('fund', [WalletController::class, 'fund']);
-            Route::get('verify/{reference}', [WalletController::class, 'verify']);
+            Route::get('/', [WalletController::class, 'index']);
+            Route::get('/history', [WalletController::class, 'history']);
+            Route::post('/fund', [WalletController::class, 'fund']);
+            Route::post('/fund/card', [WalletController::class, 'fundWithCard']);
+            Route::post('/fund/bank', [WalletController::class, 'fundWithBank']);
+            Route::post('/verify', [WalletController::class, 'verifyPayment']);
+            Route::post('/submit-otp', [WalletController::class, 'submitOtp']);
+            Route::post('/submit-pin', [WalletController::class, 'submitPin']);
+            Route::post('/submit-birthday', [WalletController::class, 'submitBirthday']);
+            Route::get('/banks', [WalletController::class, 'getBanks']);
         });
 
         // Airtime
