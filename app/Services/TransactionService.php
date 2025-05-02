@@ -23,9 +23,9 @@ class TransactionService
         $this->transactionRepository = $transactionRepository;
     }
 
-    public function getUserTransactions(User $user, array $filters = [], int $perPage = 15): LengthAwarePaginator
+    public function getUserTransactions(User $user, array $filters = []): LengthAwarePaginator
     {
-        return $this->transactionRepository->getUserTransactions($user, $filters, $perPage);
+        return $this->transactionRepository->getUserTransactions($user, $filters);
     }
 
     public function getTransaction(User $user, int $transactionId): ?Transaction
@@ -46,7 +46,7 @@ class TransactionService
         $thisWeek = now()->startOfWeek();
         $thisMonth = now()->startOfMonth();
 
-        $transactions = $this->transactionRepository->getUserAllTransactions($user);
+        $transactions = $this->transactionRepository->getUserTransactions($user);
 
         return [
             'total_count' => $transactions->count(),
@@ -68,7 +68,7 @@ class TransactionService
 
     public function getTransactionStats(User $user): array
     {
-        $transactions = $this->transactionRepository->getUserAllTransactions($user);
+        $transactions = $this->transactionRepository->getUserTransactions($user);
 
         // Group by type
         $byType = $transactions->where('status', 'completed')

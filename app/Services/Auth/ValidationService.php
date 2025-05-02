@@ -12,8 +12,7 @@ class ValidationService {
     public function validateRegistrationData(array $data)
     {
         $validator = Validator::make($data, [
-            'firstname' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'phone' => 'required|string|max:20',
             'password' => 'required|string|min:8',

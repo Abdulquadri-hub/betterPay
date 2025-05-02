@@ -21,5 +21,6 @@ class SendTransactionNotification
     public function handle(object $event): void
     {
         //
+        
     }
 }

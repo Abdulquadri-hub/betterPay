@@ -2,13 +2,14 @@
 
 namespace App\Events;
 
+use App\Models\Transaction;
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
 class TransactionCompleted
 {
@@ -17,11 +18,12 @@ class TransactionCompleted
     /**
      * Create a new event instance.
      */
-    public function __construct()
-    {
-        //
-    }
+    public $transaction;
 
+    public function __construct(Transaction $transaction)
+    {
+        $this->transaction = $transaction;
+    }
     /**
      * Get the channels the event should broadcast on.
      *
