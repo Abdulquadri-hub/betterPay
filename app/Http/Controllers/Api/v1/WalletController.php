@@ -81,7 +81,7 @@ class WalletController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:100',
-            'card_number' => 'required|string|min:15|max:16',
+            'card_number' => 'required|string|min:15|max:19',
             'cvv' => 'required|string|size:3',
             'expiry_month' => 'required|string|size:2',
             'expiry_year' => 'required|string|size:2',

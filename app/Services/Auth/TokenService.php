@@ -22,7 +22,7 @@ class TokenService {
 
     public function generateEmailVerificationToken(User $user): string
     {
-        $token = rand(0000,9999);
+        $token = rand(000000,999999);
 
         $this->tokenRepository->createEmailVerificationToken($user, $token);
 

@@ -160,7 +160,7 @@ class AuthenticationService {
             return ApiResponseHandler::errorResponse("Invalid or expired token");
         }
 
-        $this->userRepository->update($user, ['is_verified' => 1, 'email_verified_at' => now()]);
+        $this->userRepository->update($user, ['is_verified' => true, 'email_verified_at' => now()]);
 
         return $this->successResponse("Email verification was successfull");
     }
