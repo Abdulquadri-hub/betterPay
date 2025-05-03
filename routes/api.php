@@ -2,15 +2,15 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\V1\AuthController;
-use App\Http\Controllers\Api\V1\WalletController;
-use App\Http\Controllers\Api\V1\AirtimeController;
-use App\Http\Controllers\Api\V1\DataController;
-use App\Http\Controllers\Api\V1\ElectricityController;
-use App\Http\Controllers\Api\V1\CableController;
-use App\Http\Controllers\Api\V1\TransactionController;
-use App\Http\Controllers\Api\V1\BeneficiaryController;
-use App\Http\Controllers\Api\V1\ScheduledPaymentController;
+use App\Http\Controllers\Api\v1\AuthController;
+use App\Http\Controllers\Api\v1\WalletController;
+use App\Http\Controllers\Api\v1\AirtimeController;
+use App\Http\Controllers\Api\v1\DataController;
+use App\Http\Controllers\Api\v1\ElectricityController;
+use App\Http\Controllers\Api\v1\CableController;
+use App\Http\Controllers\Api\v1\TransactionController;
+use App\Http\Controllers\Api\v1\BeneficiaryController;
+use App\Http\Controllers\Api\v1\ScheduledPaymentController;
 
 Route::prefix('v1')->group(function () {
 
