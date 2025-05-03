@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\v1\ScheduledPaymentController;
 
 Route::prefix('v1')->group(function () {
 
+    Route::get('/webhook', [WalletController::class, 'handleWebhook']);
+
     Route::prefix('auth')->group(function () {
         Route::post('register', [AuthController::class, 'register']);
         Route::post('verify_email', [AuthController::class, 'verifyEmail']);
@@ -45,7 +47,6 @@ Route::prefix('v1')->group(function () {
             Route::post('/submit-pin', [WalletController::class, 'submitPin']);
             Route::post('/submit-birthday', [WalletController::class, 'submitBirthday']);
             Route::get('/banks', [WalletController::class, 'getBanks']);
-            Route::get('/webhook', [WalletController::class, 'handleWebhook']);
         });
 
         // Airtime
