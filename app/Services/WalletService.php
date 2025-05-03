@@ -50,32 +50,17 @@ class WalletService
         DB::beginTransaction();
 
         try {
-            // $result = $this->paystackService->createCustomer([
-            //     'firstname' => $user->firstname,
-            //     'lastname' => $user->lastname,
-            //     'email' => $user->email,
-            //     'phone' => $user->phone,
-            // ]);
-
-            // if($result['status'] === "success"){
-                // $response = $this->paystackService->assignDVTAccount([
-                //     'customer_id' => $result['data']['id']
-                // ]);
-
-                // if($response['status'] === "success"){
-                    $wallet = new Wallet([
-                        'balance' => 0,
-                        'currency' => 'NGN',
-                        // 'bank' =>  $result['bank']['name'],
-                        // 'account_name' =>  json_encode($result['account_name']),
-                        // 'account_number' =>  json_encode($result['account_number']),
-                        // 'dvt_acc_id' =>  json_encode($result['dvt_acc_id']),
-                        'is_active' => true
-                    ]);
-
-                    $user->wallet()->save($wallet);
-                // }
-            // }
+            $wallet = new Wallet([
+                'balance' => 0,
+                'currency' => 'NGN',
+                // 'bank' =>  $result['bank']['name'],
+                // 'account_name' =>  json_encode($result['account_name']),
+                // 'account_number' =>  json_encode($result['account_number']),
+                // 'dvt_acc_id' =>  json_encode($result['dvt_acc_id']),
+                'is_active' => true
+            ]);
+            
+            $user->wallet()->save($wallet);
 
             DB::commit();
             return $user;
