@@ -295,8 +295,6 @@ class WalletController extends Controller
 
     public function handleWebhook(Request $request)
     {
-        // Verify webhook signature if available
-
         try {
             $this->walletService->handlePaystackWebhook($request->all());
             return response()->json(['status' => 'success']);

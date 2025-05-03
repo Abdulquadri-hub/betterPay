@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTOs\WalletFundingDTO;
 use App\Events\WalletFunded;
 use App\Exceptions\PaymentGatewayException;
+use App\Jobs\PaystackWebhookJob;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
@@ -15,6 +16,7 @@ use App\Services\Payment\FlutterwaveService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class WalletService
 {
@@ -59,7 +61,7 @@ class WalletService
                 // 'dvt_acc_id' =>  json_encode($result['dvt_acc_id']),
                 'is_active' => true
             ]);
-            
+
             $user->wallet()->save($wallet);
 
             DB::commit();
@@ -241,7 +243,7 @@ class WalletService
     public function submitBirthdayForBankCharge(string $reference, string $birthday): array
     {
         try {
-            $transaction = $this->transactionRepository->findByReference($reference);
+            $transaction = $this->transactionRepository->findBygateWayReference($reference);
 
             if (!$transaction || $transaction->status !== 'pending') {
                 return [
@@ -261,7 +263,7 @@ class WalletService
     public function submitOtpForTransaction(string $reference, string $otp): array
     {
         try {
-            $transaction = $this->transactionRepository->findByReference($reference);
+            $transaction = $this->transactionRepository->findBygateWayReference($reference);
 
             if (!$transaction || $transaction->status !== 'pending') {
                 return [
@@ -280,7 +282,7 @@ class WalletService
     public function submitPinForTransaction(string $reference, string $pin): array
     {
         try {
-            $transaction = $this->transactionRepository->findByReference($reference);
+            $transaction = $this->transactionRepository->findBygateWayReference($reference);
 
             if (!$transaction || $transaction->status !== 'pending') {
                 return [
@@ -321,7 +323,7 @@ class WalletService
 
     public function verifyWalletFunding(User $user, string $reference): Transaction
     {
-        $transaction = $this->transactionRepository->findByReference($reference);
+        $transaction = $this->transactionRepository->findBygateWayReference($reference);
 
         if (!$transaction || $transaction->user_id !== $user->id) {
             throw new \Exception('Transaction not found');
@@ -373,7 +375,7 @@ class WalletService
         }
     }
 
-    public function handlePaystackWebhook(array $payload): void
+    public function handlePaystackWebhook_old(array $payload): void
     {
         $event = $payload['event'] ?? null;
 
@@ -395,5 +397,39 @@ class WalletService
         }
 
         $this->completeWalletFunding($transaction);
+    }
+
+    public function handlePaystackWebhook($request)
+    {
+        if (!$this->verifyWebhookSignature($request)) {
+            Log::warning('Invalid Paystack webhook signature');
+            return response()->json(['status' => 'error'], 401);
+        }
+
+        $payload = $request->all();
+        $event = $payload['event'] ?? null;
+        $data = $payload['data'] ?? [];
+        $reference = $data['reference'] ?? null;
+
+        if (!$reference || !$event) {
+            Log::warning('Invalid Paystack webhook payload: missing reference or event');
+            return response()->json(['status' => 'error'], 400);
+        }
+
+        PaystackWebhookJob::dispatch($reference, $event, $payload);
+    }
+
+    private function verifyWebhookSignature($request)
+    {
+        $signature = $request->header('x-paystack-signature');
+        if (!$signature) {
+            return false;
+        }
+
+        $secret = config('services.paystack.secret_key');
+
+        $calculatedSignature = hash_hmac('sha512', $request->getContent(), $secret);
+
+        return hash_equals($calculatedSignature, $signature);
     }
 }
