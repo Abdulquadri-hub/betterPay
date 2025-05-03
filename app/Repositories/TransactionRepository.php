@@ -20,6 +20,11 @@ class TransactionRepository extends BaseRepository
         return $this->model->where('reference', $reference)->first();
     }
 
+    public function findBygateWayReference(string $reference): ?Transaction
+    {
+        return $this->model->where('gateway_reference', $reference)->first();
+    }
+
     public function getWalletTransactions(Wallet $wallet): Collection
     {
         return $this->model->where('user_id', $wallet->user_id)
