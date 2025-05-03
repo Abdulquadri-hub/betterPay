@@ -61,8 +61,10 @@ class AuthenticationService {
 
             $this->notificationService->sendEmailVerification($user, $token);
 
+            $data = User::find($user->id);
+
             DB::commit();
-            return ApiResponseHandler::successResponse($user, "User registration was successful.", 201);
+            return ApiResponseHandler::successResponse($data, "User registration was successful.", 201);
 
         } catch (\Throwable $th) {
             DB::rollBack();
