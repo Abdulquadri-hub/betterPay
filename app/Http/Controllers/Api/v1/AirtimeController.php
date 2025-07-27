@@ -7,5 +7,9 @@ use Illuminate\Http\Request;
 
 class AirtimeController extends Controller
 {
-    //
+    
+    public function save(){
+        return "this is the save data method";
+    }
+
 }

@@ -24,7 +24,7 @@ class WalletController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $wallet = $this->walletService->getWalletByUser($user);
+        $wallet = $this->walletService->getFormattedWalletHistory($user);
 
         return response()->json([
             'status' => 'success',

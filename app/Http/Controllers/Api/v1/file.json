@@ -1,0 +1,923 @@
+
+{
+  "api_documentation": {
+    "base_url": "https://api.betteredgestechnologies.com.ng/api/v1",
+    "authentication": {
+      "type": "Bearer Token",
+      "header": "Authorization: Bearer {token}",
+      "description": "Most endpoints require authentication via Bearer token in the Authorization header"
+    },
+    "response_format": {
+      "success_response": {
+        "success": true,
+        "data": "actual_response_data",
+        "message": "optional_success_message"
+      },
+      "error_response": {
+        "success": false,
+        "message": "error_message",
+        "errors": {
+          "field_name": ["validation error messages"]
+        }
+      }
+    },
+    "endpoints": {
+      "authentication": {
+        "login": {
+          "method": "POST",
+          "endpoint": "/auth/login",
+          "description": "Authenticate user and get access token",
+          "requires_auth": false,
+          "request": {
+            "email": "string (required)",
+            "password": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "user": {
+                "id": "string",
+                "name": "string",
+                "email": "string",
+                "phone": "string|null",
+                "avatar": "string|null",
+                "walletBalance": "number",
+                "createdAt": "string (ISO date)",
+                "role": "string|null",
+                "isVerified": "boolean|null",
+                "hasTransactionPin": "boolean",
+                "email_verified_at": "string|null",
+                "pin": "boolean|null",
+                "is_verified": "boolean|null",
+                "is_admin": "boolean|null",
+                "is_approved": "boolean|null",
+                "approved_at": "string|null",
+                "approved_by": "string|null",
+                "profile_photo_path": "string|null"
+              },
+              "token": "string"
+            }
+          }
+        },
+        "register": {
+          "method": "POST",
+          "endpoint": "/auth/register",
+          "description": "Register a new user account",
+          "requires_auth": false,
+          "request": {
+            "name": "string (required)",
+            "email": "string (required)",
+            "password": "string (required)",
+            "phone": "string (optional)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "name": "string",
+              "email": "string",
+              "phone": "string|null",
+              "avatar": "string|null",
+              "walletBalance": "number",
+              "createdAt": "string (ISO date)",
+              "role": "string|null",
+              "isVerified": "boolean|null",
+              "hasTransactionPin": "boolean",
+              "email_verified_at": "string|null",
+              "pin": "boolean|null",
+              "is_verified": "boolean|null",
+              "is_admin": "boolean|null",
+              "is_approved": "boolean|null",
+              "approved_at": "string|null",
+              "approved_by": "string|null",
+              "profile_photo_path": "string|null"
+            }
+          }
+        },
+        "logout": {
+          "method": "POST",
+          "endpoint": "/auth/logout",
+          "description": "Logout user and invalidate token",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "message": "Logged out successfully"
+          }
+        },
+        "get_current_user": {
+          "method": "GET",
+          "endpoint": "/auth/user",
+          "description": "Get current authenticated user information",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "name": "string",
+              "email": "string",
+              "phone": "string|null",
+              "avatar": "string|null",
+              "walletBalance": "number",
+              "createdAt": "string (ISO date)",
+              "role": "string|null",
+              "isVerified": "boolean|null",
+              "hasTransactionPin": "boolean",
+              "email_verified_at": "string|null",
+              "pin": "boolean|null",
+              "is_verified": "boolean|null",
+              "is_admin": "boolean|null",
+              "is_approved": "boolean|null",
+              "approved_at": "string|null",
+              "approved_by": "string|null",
+              "profile_photo_path": "string|null"
+            }
+          }
+        },
+        "forgot_password": {
+          "method": "POST",
+          "endpoint": "/auth/forgot-password",
+          "description": "Send password reset email",
+          "requires_auth": false,
+          "request": {
+            "email": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "message": "Password reset email sent"
+          }
+        },
+        "reset_password": {
+          "method": "POST",
+          "endpoint": "/auth/reset-password",
+          "description": "Reset password using token",
+          "requires_auth": false,
+          "request": {
+            "token": "string (required)",
+            "password": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "message": "Password reset successfully"
+          }
+        },
+        "verify_email": {
+          "method": "POST",
+          "endpoint": "/auth/verify_email",
+          "description": "Verify user email with token",
+          "requires_auth": false,
+          "request": {
+            "token": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "message": "Email verified successfully"
+          }
+        },
+        "resend_verification_email": {
+          "method": "POST",
+          "endpoint": "/auth/resend-verification",
+          "description": "Resend email verification",
+          "requires_auth": false,
+          "request": {
+            "email": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "message": "Verification email sent"
+          }
+        },
+        "send_identity_verification_code": {
+          "method": "POST",
+          "endpoint": "/auth/send-identity-verification",
+          "description": "Send identity verification code",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "message": "Verification code sent"
+          }
+        },
+        "verify_user_identity": {
+          "method": "POST",
+          "endpoint": "/auth/verify-identity",
+          "description": "Verify user identity with code",
+          "requires_auth": true,
+          "request": {
+            "code": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "message": "Identity verified successfully"
+          }
+        },
+        "set_transaction_pin": {
+          "method": "POST",
+          "endpoint": "/auth/set-transaction-pin",
+          "description": "Set user transaction PIN",
+          "requires_auth": true,
+          "request": {
+            "pin": "string (required, 4-6 digits)"
+          },
+          "response": {
+            "success": true,
+            "message": "Transaction PIN set successfully"
+          }
+        },
+        "verify_transaction_pin": {
+          "method": "POST",
+          "endpoint": "/auth/verify-transaction-pin",
+          "description": "Verify user transaction PIN",
+          "requires_auth": true,
+          "request": {
+            "pin": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "message": "PIN verified successfully"
+          }
+        },
+        "reset_transaction_pin": {
+          "method": "POST",
+          "endpoint": "/auth/reset-transaction-pin",
+          "description": "Reset user transaction PIN",
+          "requires_auth": true,
+          "request": {
+            "old_pin": "string (required)",
+            "new_pin": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "message": "Transaction PIN reset successfully"
+          }
+        }
+      },
+      "wallet": {
+        "get_wallet_info": {
+          "method": "GET",
+          "endpoint": "/wallet",
+          "description": "Get user wallet information",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": {
+              "balance": "number",
+              "updated_at": "string (ISO date)"
+            }
+          }
+        },
+        "get_wallet_history": {
+          "method": "GET",
+          "endpoint": "/wallet/history",
+          "description": "Get user wallet funding history",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": [
+              {
+                "id": "number",
+                "reference": "string",
+                "amount": "string|number",
+                "status": "string (pending|completed|failed)",
+                "created_at": "string (ISO date)",
+                "completed_at": "string|null (ISO date)",
+                "user_id": "number",
+                "metadata": {
+                  "payment_type": "string (card|bank_transfer|saved_method)"
+                }
+              }
+            ]
+          }
+        },
+        "fund_wallet": {
+          "method": "POST",
+          "endpoint": "/wallet/fund",
+          "description": "Initiate wallet funding",
+          "requires_auth": true,
+          "request": {
+            "amount": "number (required)",
+            "payment_method": "string (optional, card|bank_transfer|saved_method)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "success": "boolean",
+              "message": "string"
+            }
+          }
+        },
+        "verify_payment": {
+          "method": "POST",
+          "endpoint": "/wallet/verify",
+          "description": "Verify payment status",
+          "requires_auth": true,
+          "request": {
+            "reference": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "success": "boolean",
+              "message": "string",
+              "status": "string"
+            }
+          }
+        }
+      },
+      "transactions": {
+        "get_transactions": {
+          "method": "GET",
+          "endpoint": "/transactions",
+          "description": "Get user transaction history",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": [
+              {
+                "id": "string",
+                "reference": "string",
+                "type": "string",
+                "amount": "number",
+                "status": "string (pending|completed|failed)",
+                "createdAt": "string (ISO date)",
+                "completedAt": "string|null (ISO date)",
+                "userId": "string",
+                "serviceType": "string|null",
+                "provider": "string|null",
+                "providerLogo": "string|null",
+                "description": "string|null",
+                "fee": "number|null",
+                "total": "number|null",
+                "recipientInfo": "string|null",
+                "metadata": "object|null"
+              }
+            ]
+          }
+        },
+        "get_transaction": {
+          "method": "GET",
+          "endpoint": "/transactions/{id}",
+          "description": "Get specific transaction details",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "reference": "string",
+              "type": "string",
+              "amount": "number",
+              "status": "string (pending|completed|failed)",
+              "createdAt": "string (ISO date)",
+              "completedAt": "string|null (ISO date)",
+              "userId": "string",
+              "serviceType": "string|null",
+              "provider": "string|null",
+              "providerLogo": "string|null",
+              "description": "string|null",
+              "fee": "number|null",
+              "total": "number|null",
+              "recipientInfo": "string|null",
+              "metadata": "object|null"
+            }
+          }
+        }
+      },
+      "airtime": {
+        "get_providers": {
+          "method": "GET",
+          "endpoint": "/airtime/providers",
+          "description": "Get list of airtime providers",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": [
+              {
+                "id": "string",
+                "name": "string",
+                "logo": "string",
+                "category": "string"
+              }
+            ]
+          }
+        },
+        "buy_airtime": {
+          "method": "POST",
+          "endpoint": "/airtime/purchase",
+          "description": "Purchase airtime",
+          "requires_auth": true,
+          "request": {
+            "provider": "string (required)",
+            "phoneNumber": "string (required)",
+            "amount": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "reference": "string",
+              "type": "string",
+              "amount": "number",
+              "status": "string (pending|completed|failed)",
+              "createdAt": "string (ISO date)",
+              "metadata": "object"
+            }
+          }
+        }
+      },
+      "data": {
+        "get_providers": {
+          "method": "GET",
+          "endpoint": "/data/providers",
+          "description": "Get list of data providers",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": [
+              {
+                "id": "string",
+                "name": "string",
+                "logo": "string",
+                "category": "string"
+              }
+            ]
+          }
+        },
+        "get_packages": {
+          "method": "GET",
+          "endpoint": "/data/packages/{providerId}",
+          "description": "Get data packages for a provider",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": [
+              {
+                "id": "string",
+                "name": "string",
+                "price": "number",
+                "duration": "string",
+                "description": "string|null"
+              }
+            ]
+          }
+        },
+        "purchase_data": {
+          "method": "POST",
+          "endpoint": "/data/purchase",
+          "description": "Purchase data bundle",
+          "requires_auth": true,
+          "request": {
+            "provider": "string (required)",
+            "phoneNumber": "string (required)",
+            "dataPackage": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "reference": "string",
+              "type": "string",
+              "amount": "number",
+              "status": "string (pending|completed|failed)",
+              "createdAt": "string (ISO date)",
+              "metadata": "object"
+            }
+          }
+        }
+      },
+      "electricity": {
+        "get_providers": {
+          "method": "GET",
+          "endpoint": "/electricity/providers",
+          "description": "Get list of electricity providers",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": [
+              {
+                "id": "string",
+                "name": "string",
+                "logo": "string",
+                "category": "string"
+              }
+            ]
+          }
+        },
+        "verify_meter": {
+          "method": "POST",
+          "endpoint": "/electricity/verify",
+          "description": "Verify electricity meter number",
+          "requires_auth": true,
+          "request": {
+            "providerId": "string (required)",
+            "meterNumber": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "name": "string",
+              "address": "string"
+            }
+          }
+        },
+        "pay_electricity": {
+          "method": "POST",
+          "endpoint": "/electricity/pay",
+          "description": "Pay electricity bill",
+          "requires_auth": true,
+          "request": {
+            "provider": "string (required)",
+            "meterNumber": "string (required)",
+            "amount": "string (required)",
+            "phone": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "reference": "string",
+              "type": "string",
+              "amount": "number",
+              "status": "string (pending|completed|failed)",
+              "createdAt": "string (ISO date)",
+              "metadata": "object"
+            }
+          }
+        }
+      },
+      "cable": {
+        "get_providers": {
+          "method": "GET",
+          "endpoint": "/cable/providers",
+          "description": "Get list of cable TV providers",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": [
+              {
+                "id": "string",
+                "name": "string",
+                "logo": "string",
+                "category": "string"
+              }
+            ]
+          }
+        },
+        "get_packages": {
+          "method": "GET",
+          "endpoint": "/cable/packages/{providerId}",
+          "description": "Get cable TV packages for a provider",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": [
+              {
+                "id": "string",
+                "name": "string",
+                "price": "number",
+                "duration": "string",
+                "description": "string|null"
+              }
+            ]
+          }
+        },
+        "verify_customer": {
+          "method": "POST",
+          "endpoint": "/cable/verify",
+          "description": "Verify cable TV customer",
+          "requires_auth": true,
+          "request": {
+            "providerId": "string (required)",
+            "smartCardNumber": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "name": "string",
+              "address": "string"
+            }
+          }
+        },
+        "subscribe_cable": {
+          "method": "POST",
+          "endpoint": "/cable/subscribe",
+          "description": "Subscribe to cable TV package",
+          "requires_auth": true,
+          "request": {
+            "provider": "string (required)",
+            "smartCardNumber": "string (required)",
+            "packageId": "string (required)",
+            "phoneNumber": "string (required)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "reference": "string",
+              "type": "string",
+              "amount": "number",
+              "status": "string (pending|completed|failed)",
+              "createdAt": "string (ISO date)",
+              "metadata": "object"
+            }
+          }
+        }
+      },
+      "beneficiaries": {
+        "get_beneficiaries": {
+          "method": "GET",
+          "endpoint": "/beneficiaries",
+          "description": "Get user's saved beneficiaries",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": [
+              {
+                "id": "string",
+                "userId": "string",
+                "name": "string",
+                "identifier": "string",
+                "serviceType": "string (airtime|data|electricity|cable)",
+                "provider": "string|null",
+                "providerLogo": "string|null",
+                "createdAt": "string (ISO date)",
+                "lastUsed": "string|null (ISO date)",
+                "frequentlyUsed": "boolean"
+              }
+            ]
+          }
+        },
+        "get_beneficiary": {
+          "method": "GET",
+          "endpoint": "/beneficiaries/{id}",
+          "description": "Get specific beneficiary details",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "userId": "string",
+              "name": "string",
+              "identifier": "string",
+              "serviceType": "string (airtime|data|electricity|cable)",
+              "provider": "string|null",
+              "providerLogo": "string|null",
+              "createdAt": "string (ISO date)",
+              "lastUsed": "string|null (ISO date)",
+              "frequentlyUsed": "boolean"
+            }
+          }
+        },
+        "create_beneficiary": {
+          "method": "POST",
+          "endpoint": "/beneficiaries",
+          "description": "Create a new beneficiary",
+          "requires_auth": true,
+          "request": {
+            "name": "string (required)",
+            "identifier": "string (required)",
+            "serviceType": "string (required, airtime|data|electricity|cable)",
+            "provider": "string (optional)",
+            "providerLogo": "string (optional)",
+            "frequentlyUsed": "boolean (optional, default: false)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "userId": "string",
+              "name": "string",
+              "identifier": "string",
+              "serviceType": "string",
+              "provider": "string|null",
+              "providerLogo": "string|null",
+              "createdAt": "string (ISO date)",
+              "lastUsed": "string|null",
+              "frequentlyUsed": "boolean"
+            }
+          }
+        },
+        "update_beneficiary": {
+          "method": "PUT",
+          "endpoint": "/beneficiaries/{id}",
+          "description": "Update an existing beneficiary",
+          "requires_auth": true,
+          "request": {
+            "name": "string (optional)",
+            "identifier": "string (optional)",
+            "serviceType": "string (optional)",
+            "provider": "string (optional)",
+            "providerLogo": "string (optional)",
+            "frequentlyUsed": "boolean (optional)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "userId": "string",
+              "name": "string",
+              "identifier": "string",
+              "serviceType": "string",
+              "provider": "string|null",
+              "providerLogo": "string|null",
+              "createdAt": "string (ISO date)",
+              "lastUsed": "string|null",
+              "frequentlyUsed": "boolean"
+            }
+          }
+        },
+        "delete_beneficiary": {
+          "method": "DELETE",
+          "endpoint": "/beneficiaries/{id}",
+          "description": "Delete a beneficiary",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "message": "Beneficiary deleted successfully"
+          }
+        }
+      },
+      "scheduled_payments": {
+        "get_scheduled_payments": {
+          "method": "GET",
+          "endpoint": "/scheduled-payments",
+          "description": "Get user's scheduled payments",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": [
+              {
+                "id": "string",
+                "userId": "string",
+                "serviceType": "string (airtime|data|electricity|cable)",
+                "recipientInfo": "string",
+                "amount": "number",
+                "frequency": "string (once|daily|weekly|monthly)",
+                "startDate": "string (ISO date)",
+                "nextDate": "string (ISO date)",
+                "provider": "string",
+                "providerLogo": "string|null",
+                "status": "string (active|paused|completed|failed)",
+                "createdAt": "string (ISO date)",
+                "metadata": "object|null"
+              }
+            ]
+          }
+        },
+        "get_scheduled_payment": {
+          "method": "GET",
+          "endpoint": "/scheduled-payments/{id}",
+          "description": "Get specific scheduled payment details",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "userId": "string",
+              "serviceType": "string (airtime|data|electricity|cable)",
+              "recipientInfo": "string",
+              "amount": "number",
+              "frequency": "string (once|daily|weekly|monthly)",
+              "startDate": "string (ISO date)",
+              "nextDate": "string (ISO date)",
+              "provider": "string",
+              "providerLogo": "string|null",
+              "status": "string (active|paused|completed|failed)",
+              "createdAt": "string (ISO date)",
+              "metadata": "object|null"
+            }
+          }
+        },
+        "create_scheduled_payment": {
+          "method": "POST",
+          "endpoint": "/scheduled-payments",
+          "description": "Create a new scheduled payment",
+          "requires_auth": true,
+          "request": {
+            "serviceType": "string (required, airtime|data|electricity|cable)",
+            "recipientInfo": "string (required)",
+            "amount": "number (required)",
+            "frequency": "string (required, once|daily|weekly|monthly)",
+            "startDate": "string (required, ISO date)",
+            "provider": "string (required)",
+            "providerLogo": "string (optional)",
+            "metadata": "object (optional)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "userId": "string",
+              "serviceType": "string",
+              "recipientInfo": "string",
+              "amount": "number",
+              "frequency": "string",
+              "startDate": "string (ISO date)",
+              "nextDate": "string (ISO date)",
+              "provider": "string",
+              "providerLogo": "string|null",
+              "status": "string",
+              "createdAt": "string (ISO date)",
+              "metadata": "object|null"
+            }
+          }
+        },
+        "update_scheduled_payment": {
+          "method": "PUT",
+          "endpoint": "/scheduled-payments/{id}",
+          "description": "Update an existing scheduled payment",
+          "requires_auth": true,
+          "request": {
+            "serviceType": "string (optional)",
+            "recipientInfo": "string (optional)",
+            "amount": "number (optional)",
+            "frequency": "string (optional)",
+            "startDate": "string (optional, ISO date)",
+            "provider": "string (optional)",
+            "providerLogo": "string (optional)",
+            "status": "string (optional)",
+            "metadata": "object (optional)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "userId": "string",
+              "serviceType": "string",
+              "recipientInfo": "string",
+              "amount": "number",
+              "frequency": "string",
+              "startDate": "string (ISO date)",
+              "nextDate": "string (ISO date)",
+              "provider": "string",
+              "providerLogo": "string|null",
+              "status": "string",
+              "createdAt": "string (ISO date)",
+              "metadata": "object|null"
+            }
+          }
+        },
+        "delete_scheduled_payment": {
+          "method": "DELETE",
+          "endpoint": "/scheduled-payments/{id}",
+          "description": "Delete a scheduled payment",
+          "requires_auth": true,
+          "request": {},
+          "response": {
+            "success": true,
+            "message": "Scheduled payment deleted successfully"
+          }
+        },
+        "toggle_scheduled_payment": {
+          "method": "PATCH",
+          "endpoint": "/scheduled-payments/{id}/toggle",
+          "description": "Toggle scheduled payment status (active/paused)",
+          "requires_auth": true,
+          "request": {
+            "status": "string (required, active|paused)"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "id": "string",
+              "userId": "string",
+              "serviceType": "string",
+              "recipientInfo": "string",
+              "amount": "number",
+              "frequency": "string",
+              "startDate": "string (ISO date)",
+              "nextDate": "string (ISO date)",
+              "provider": "string",
+              "providerLogo": "string|null",
+              "status": "string",
+              "createdAt": "string (ISO date)",
+              "metadata": "object|null"
+            }
+          }
+        }
+      }
+    },
+    "notes": {
+      "date_format": "All dates are in ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)",
+      "authentication": "Bearer token is required for most endpoints. Include it in the Authorization header.",
+      "error_handling": "All endpoints return consistent error format with success: false and descriptive error messages",
+      "validation": "Request validation errors are returned in the 'errors' object with field-specific messages",
+      "response_consistency": "All successful responses have success: true and data contains the actual response payload"
+    }
+  }
+}

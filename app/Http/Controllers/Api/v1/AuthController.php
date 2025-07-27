@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\v1;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use App\Traits\ApiResponseHandler;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
@@ -45,8 +44,27 @@ class AuthController extends Controller
         return $this->authService->logout($request);
     }
 
-    public function user(Request $request): JsonResponse
-    {
+    public function user(Request $request){
         return ApiResponseHandler::successResponse(new UserResource($request->user()), "User fetched successfully.");
+    }
+
+    public function resendVerificationEmail(Request $request)
+    {
+        return $this->authService->resendVerificationEmail($request->input('email'));
+    }
+
+    public function setTransactionPin(Request $request)
+    {
+        return $this->authService->setTransactionPin($request->all(), $request);
+    }
+
+    public function resetTransactionPin(Request $request)
+    {
+        return $this->authService->resetTransactionPin($request->all(), $request);
+    }
+
+    public function verifyTransactionPin(Request $request)
+    {
+        return $this->authService->verifyTransactionPin($request->all(), $request);
     }
 }

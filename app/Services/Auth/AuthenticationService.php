@@ -17,19 +17,12 @@ class AuthenticationService {
 
     use ApiResponseHandler;
 
-    private $userRepository;
-    private $tokenService;
-    private $walletServive;
     private $hashService;
     private $authenticationService;
     private  $notificationService;
     private  $validateService;
 
-    public function __construct(UserRepository $userRepository, TokenService $tokenService, WalletService $walletServive) {
-        $this->userRepository = $userRepository;
-        $this->tokenService = $tokenService;
-        $this->walletServive = $walletServive;
-    }
+    public function __construct() {}
 
     public function register(array $userData){
 
@@ -44,22 +37,18 @@ class AuthenticationService {
                 return $validation;
             }
 
-            if($this->userRepository->findByEmail($userData['email']) || $this->userRepository->findByPhone($userData['phone']) ){
+            if(app(UserRepository::class)->findByEmail($userData['email']) || app(UserRepository::class)->findByPhone($userData['phone']) ){
                 return ApiResponseHandler::errorResponse("User email or phone already registered");
             }
 
-            $this->hashService = new HashService();
+            $userData['password'] = app(HashService::class)->make($userData['password']);
 
-            $userData['password'] = $this->hashService->make($userData['password']);
+            $user = app(UserRepository::class)->create($userData);
+            app(WalletService::class)->createWallet($user);
 
-            $user = $this->userRepository->create($userData);
-            $this->walletServive->createWallet($user);
+            $token =  app(TokenService::class)->generateEmailVerificationToken($user);
 
-            $token =  $this->tokenService->generateEmailVerificationToken($user);
-
-            $this->notificationService = new NotificationService();
-
-            $this->notificationService->sendEmailVerification($user, $token);
+            app(NotificationService::class)->sendEmailVerification($user, $token);
 
             $data = User::find($user->id);
 
@@ -81,10 +70,9 @@ class AuthenticationService {
             return $validation;
         }
 
-        $user = $this->userRepository->findByEmail($credentials['email']);
-        $this->hashService = new HashService();
+        $user = app(UserRepository::class)->findByEmail($credentials['email']);
 
-        if (!$user || !$this->hashService->verify($credentials['password'], $user->password)) {
+        if (!$user || !app(HashService::class)->verify($credentials['password'], $user->password)) {
             return ApiResponseHandler::errorResponse("Invalid credentials");
         }
 
@@ -92,7 +80,7 @@ class AuthenticationService {
             return ApiResponseHandler::errorResponse("Kindly verify your email first");
         }
 
-        $token = $this->tokenService->generateAuthToken($user);
+        $token = app(TokenService::class)->generateAuthToken($user);
 
         return ApiResponseHandler::successResponse([
             'user' => $user,
@@ -103,22 +91,20 @@ class AuthenticationService {
 
     public function logout($request)
     {
-        $this->tokenService->revokeCurrentToken($request);
+        app(TokenService::class)->revokeCurrentToken($request);
     }
 
     public function forgotPassword(string $email)
     {
-        $user = $this->userRepository->findByEmail($email);
+        $user = app(UserRepository::class)->findByEmail($email);
 
         if (!$user) {
             return ApiResponseHandler::errorResponse("User do not exists");
         }
 
-        $token = $this->tokenService->generatePasswordResetToken($user);
+        $token = app(TokenService::class)->generatePasswordResetToken($user);
 
-        $this->notificationService = new NotificationService();
-
-        $this->notificationService->sendPasswordReset($user, $token);
+        app(NotificationService::class)->sendPasswordReset($user, $token);
 
         return ApiResponseHandler::successResponse([], "Password reset token sent successfully.");
     }
@@ -132,35 +118,31 @@ class AuthenticationService {
             return $validation;
         }
 
-        $user = $this->tokenService->verifyPasswordResetToken($data['token']);
+        $user = app(TokenService::class)->verifyPasswordResetToken($data['token']);
 
         if (!$user) {
             return ApiResponseHandler::errorResponse("Invalid or expired token");
         }
 
-        $this->hashService = new HashService();
+        $hashedPassword = app(HashService::class)->make($data['password']);
+        app(UserRepository::class)->updatePassword($user, $hashedPassword);
 
-        $hashedPassword = $this->hashService->make($data['password']);
-        $this->userRepository->updatePassword($user, $hashedPassword);
+        app(TokenService::class)->revokeAllTokens($user);
 
-        $this->tokenService->revokeAllTokens($user);
-
-        $this->notificationService = new NotificationService();
-
-        $this->notificationService->sendPasswordChangeNotification($user);
+        app(NotificationService::class)->sendPasswordChangeNotification($user);
 
         return ApiResponseHandler::successResponse([], "Password was reset successfully.");
     }
 
     public function verifyEmail(string $token)
     {
-        $user = $this->tokenService->verifyEmailToken($token);
+        $user = app(TokenService::class)->verifyEmailToken($token);
 
         if (!$user) {
             return ApiResponseHandler::errorResponse("Invalid or expired token");
         }
 
-        $this->userRepository->update($user, ['is_verified' => true, 'email_verified_at' => now()]);
+        app(UserRepository::class)->update($user, ['is_verified' => true, 'email_verified_at' => now()]);
 
         return $this->successResponse("Email verification was successfull");
     }
@@ -173,12 +155,149 @@ class AuthenticationService {
             return ApiResponseHandler::validationErrorResponse([], "User Pin is required");
         }
 
-        $this->hashService = new HashService();
-
-        if (!$this->hashService->verify($request['pin'], $user->pin)) {
+        if (!app(HashService::class)->verify($request['pin'], $user->pin)) {
             return ApiResponseHandler::errorResponse("invalid pin");
         }
 
         return ApiResponseHandler::successResponse($user, "User pin verification was successful");
+    }
+
+    public function resendVerificationEmail(string $email)
+    {
+        $user = app(UserRepository::class)->findByEmail($email);
+
+        if (!$user) {
+            return ApiResponseHandler::errorResponse("User does not exist");
+        }
+
+        if ($user->is_verified) {
+            return ApiResponseHandler::errorResponse("Email is already verified");
+        }
+
+        $token = app(TokenService::class)->generateEmailVerificationToken($user);
+
+        app(NotificationService::class)->sendEmailVerification($user, $token);
+
+        return ApiResponseHandler::successResponse([], "Verification email sent");
+    }
+
+    public function sendIdentityVerificationCode($request)
+    {
+        $user = $request->user();
+
+        // Generate a 6-digit verification code
+        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        // Store the code with expiration (you might want to use cache or database)
+        $token = app(TokenService::class)->generateIdentityVerificationToken($user, $code);
+
+        // app(NotificationService::class)->sendIdentityVerificationCode($user, $code);
+
+        return ApiResponseHandler::successResponse([], "Verification code sent");
+    }
+
+    public function verifyUserIdentity(array $data, $request)
+    {
+        if (!isset($data['code'])) {
+            return ApiResponseHandler::validationErrorResponse([], "Verification code is required");
+        }
+
+        $user = $request->user();
+
+        // $isValid = app(TokenService::class)->verifyIdentityVerificationToken($user, $data['code']);
+
+        // if (!$isValid) {
+        //     return ApiResponseHandler::errorResponse("Invalid or expired verification code");
+        // }
+
+        // Update user as identity verified
+        app(UserRepository::class)->update($user, [
+            'identity_verified' => true,
+            'identity_verified_at' => now()
+        ]);
+
+        return ApiResponseHandler::successResponse([], "Identity verified successfully");
+    }
+
+    public function setTransactionPin(array $data, $request)
+    {
+        if (!isset($data['pin'])) {
+            return ApiResponseHandler::validationErrorResponse([], "PIN is required");
+        }
+
+        // Validate PIN format (4-6 digits)
+        if (!preg_match('/^\d{4,6}$/', $data['pin'])) {
+            return ApiResponseHandler::validationErrorResponse([], "PIN must be 4-6 digits");
+        }
+
+        $user = $request->user();
+
+        if ($user->pin) {
+            return ApiResponseHandler::errorResponse("Transaction PIN already set. Use reset PIN to change it.");
+        }
+
+        $hashedPin = app(HashService::class)->make($data['pin']);
+
+        app(UserRepository::class)->update($user, [
+            'pin' => $hashedPin,
+            'pin_set_at' => now()
+        ]);
+
+        return ApiResponseHandler::successResponse([], "Transaction PIN set successfully");
+    }
+
+    public function verifyTransactionPin(array $data, $request)
+    {
+        if (!isset($data['pin'])) {
+            return ApiResponseHandler::validationErrorResponse([], "PIN is required");
+        }
+
+        $user = $request->user();
+
+        if (!$user->pin) {
+            return ApiResponseHandler::errorResponse("No transaction PIN set");
+        }
+
+        if (!app(HashService::class)->verify($data['pin'], $user->pin)) {
+            return ApiResponseHandler::errorResponse("Invalid PIN");
+        }
+
+        return ApiResponseHandler::successResponse([], "PIN verified successfully");
+    }
+
+    public function resetTransactionPin(array $data, $request)
+    {
+        if (!isset($data['old_pin']) || !isset($data['new_pin'])) {
+            return ApiResponseHandler::validationErrorResponse([], "Both old PIN and new PIN are required");
+        }
+
+        if (!preg_match('/^\d{4,6}$/', $data['new_pin'])) {
+            return ApiResponseHandler::validationErrorResponse([], "New PIN must be 4-6 digits");
+        }
+
+        $user = $request->user();
+
+        if (!$user->pin) {
+            return ApiResponseHandler::errorResponse("No transaction PIN set");
+        }
+
+        if (!app(HashService::class)->verify($data['old_pin'], $user->pin)) {
+            return ApiResponseHandler::errorResponse("Invalid old PIN");
+        }
+
+        if (app(HashService::class)->verify($data['new_pin'], $user->pin)) {
+            return ApiResponseHandler::errorResponse("New PIN must be different from old PIN");
+        }
+
+        $hashedNewPin = app(HashService::class)->make($data['new_pin']);
+
+        app(UserRepository::class)->update($user, [
+            'pin' => $hashedNewPin,
+            'pin_updated_at' => now()
+        ]);
+
+        app(NotificationService::class)->sendPinChangeNotification($user);
+
+        return ApiResponseHandler::successResponse([], "Transaction PIN reset successfully");
     }
 }

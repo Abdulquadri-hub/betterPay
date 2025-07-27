@@ -20,8 +20,8 @@ Route::prefix('v1')->group(function () {
         Route::post('register', [AuthController::class, 'register']);
         Route::post('verify_email', [AuthController::class, 'verifyEmail']);
         Route::post('login', [AuthController::class, 'login']);
-        Route::post('forgot_password', [AuthController::class, 'forgotPassword']);
-        Route::post('reset_password', [AuthController::class, 'resetPassword']);
+        Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+        Route::post('reset-password', [AuthController::class, 'resetPassword']);
     });
 
     Route::post('webhooks/paystack', [WalletController::class, 'paystackWebhook']);

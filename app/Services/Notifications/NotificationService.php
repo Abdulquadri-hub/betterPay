@@ -4,10 +4,10 @@ namespace App\Services\Notifications;
 
 use App\Models\User;
 use Illuminate\Support\Str;
+use App\Notifications\PinChangedNotification;
 use App\Notifications\VerifyEmailNotification;
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\PasswordChangedNotification;
-use App\Contracts\Auth\NotificationServiceInterface;
 
 class NotificationService
 {
@@ -24,5 +24,10 @@ class NotificationService
     public function sendPasswordChangeNotification(User $user): void
     {
         $user->notify(new PasswordChangedNotification($user));
+    }
+
+    public function sendPinChangeNotification(User $user)
+    {
+        $user->notify(new PinChangedNotification($user));
     }
 }

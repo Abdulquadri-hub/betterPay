@@ -24,6 +24,11 @@ class User extends Authenticatable
         'is_approved',
         'approved_at',
         'approved_by',
+        'is_verified',
+        'pin_set_at',
+        'identity_verified',
+        'identity_verified_at',
+        'pin_updated_at'
     ];
 
     protected $hidden = [

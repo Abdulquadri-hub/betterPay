@@ -179,7 +179,6 @@ class WalletService
         }
     }
 
-
     public function fundWalletWithBank(User $user, array $data): array
     {
         $reference = 'PV-BANK-' . Str::random(16);
@@ -258,7 +257,6 @@ class WalletService
             throw new PaymentGatewayException('Birthday submission failed: ' . $e->getMessage());
         }
     }
-
 
     public function submitOtpForTransaction(string $reference, string $otp): array
     {
@@ -431,5 +429,38 @@ class WalletService
         $calculatedSignature = hash_hmac('sha512', $request->getContent(), $secret);
 
         return hash_equals($calculatedSignature, $signature);
+    }
+
+    public function getWalletInfo(User $user): array
+    {
+        $wallet = $this->getWalletByUser($user);
+
+        return [
+            'balance' => $wallet->balance,
+            'currency' => $wallet->currency ?? 'NGN',
+            'updated_at' => $wallet->updated_at->toISOString(),
+            'is_active' => $wallet->is_active
+        ];
+    }
+
+
+    public function getFormattedWalletHistory(User $user): array
+    {
+        $transactions = $this->getWalletHistory($user);
+
+        return $transactions->map(function ($transaction) {
+            return [
+                'id' => $transaction->id,
+                'reference' => $transaction->reference,
+                'amount' => $transaction->amount,
+                'status' => $transaction->status,
+                'type' => $transaction->type,
+                'payment_method' => $transaction->payment_method,
+                'created_at' => $transaction->created_at->toISOString(),
+                'completed_at' => $transaction->completed_at ? $transaction->completed_at->toISOString() : null,
+                'user_id' => $transaction->user_id,
+                'metadata' => $transaction->metadata ?? []
+            ];
+        })->toArray();
     }
 }
